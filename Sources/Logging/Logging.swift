@@ -607,7 +607,9 @@ public struct MultiplexLogHandler: LogHandler {
 /// ensures access to the underlying `FILE` is locked to prevent
 /// cross-thread interleaving of output.
 internal struct StdioOutputStream: TextOutputStream {
+    #if !os(Android)
     internal let file: UnsafeMutablePointer<FILE>
+    #endif
     internal let flushMode: FlushMode
 
     internal func write(_ string: String) {
@@ -615,16 +617,22 @@ internal struct StdioOutputStream: TextOutputStream {
             #if os(Windows)
             _lock_file(self.file)
             #else
+            #if !os(Android)
             flockfile(self.file)
+            #endif
             #endif
             defer {
                 #if os(Windows)
                 _unlock_file(self.file)
                 #else
+                #if !os(Android)
                 funlockfile(self.file)
                 #endif
+                #endif
             }
+            #if !os(Android)
             _ = fputs(ptr, self.file)
+            #endif
             if case .always = self.flushMode {
                 self.flush()
             }
@@ -634,12 +642,19 @@ internal struct StdioOutputStream: TextOutputStream {
     /// Flush the underlying stream.
     /// This has no effect when using the `.always` flush mode, which is the default
     internal func flush() {
+        #if !os(Android)
         _ = fflush(self.file)
+        #endif
     }
 
+    #if !os(Android)
     internal static let stderr = StdioOutputStream(file: systemStderr, flushMode: .always)
     internal static let stdout = StdioOutputStream(file: systemStdout, flushMode: .always)
-
+    #else
+    internal static let stderr = StdioOutputStream(flushMode: .always)
+    internal static let stdout = StdioOutputStream(flushMode: .always)
+    #endif
+    
     /// Defines the flushing strategy for the underlying stream.
     internal enum FlushMode {
         case undefined
