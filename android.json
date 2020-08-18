@@ -1,0 +1,13 @@
+{
+    "version": 1,
+    "sdk": "/Users/johnburkey/Library/Developer/Platforms/Android.platform/Developer/SDKs/Android.sdk",
+    "toolchain-bin-dir": "/Users/johnburkey/Downloads/swift-android-toolchain/usr/bin",
+    "target": "aarch64-unknown-linux-android",
+    "dynamic-library-extension": "so",
+    "extra-cc-flags": [
+        "-fPIC",
+    ],
+    "extra-swiftc-flags": [
+    ],
+    "extra-cpp-flags": ["-lstdc++"]
+}
